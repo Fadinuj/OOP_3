@@ -11,6 +11,7 @@ class All_books:
         login_window.title("All Books")
         login_window.state('zoomed')
 
+
         frame1 = tk.Frame(login_window, bg="black", bd=5)
         frame1.place(relx=0.5, rely=0.1, anchor="center")
 
