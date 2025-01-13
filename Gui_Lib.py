@@ -13,6 +13,7 @@ background_image = PhotoImage(file="/Users/fadinujedat/PycharmProjects/OOP_3/bac
 background_label = tk.Label(root, image=background_image)
 background_label.place(relwidth=1, relheight=1)
 
+
 # Frame to center buttons
 frame = tk.Frame(root, bg="#ffffff", bd=5)
 frame.place(relx=0.5, rely=0.5, anchor="center")

@@ -7,7 +7,7 @@ class Register:
     def __init__(self, previous_window, background_image):
         previous_window.withdraw()  # Hide the previous window
         register_window = tk.Toplevel(previous_window)
-        register_window.geometry("800x600")
+        register_window.geometry("1000x800")
         register_window.title("Register")
         register_window.state('zoomed')
 

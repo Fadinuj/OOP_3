@@ -8,7 +8,7 @@ class Login:
     def __init__(self, previous_window, background_image):
         previous_window.withdraw()  # Hide the previous window
         login_window = tk.Toplevel(previous_window)
-        login_window.geometry("800x600")
+        login_window.geometry("1000x800")
         login_window.title("Login")
         login_window.state('zoomed')
 
