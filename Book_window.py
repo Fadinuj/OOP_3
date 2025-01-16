@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from Book import Book  # Assuming the Book class is in Book.py
+from BookManager import BookManager
 
 class Book_window:
     def __init__(self, previous_window, background_image):
@@ -27,13 +28,7 @@ class Book_window:
         author_entry = tk.Entry(frame, font=("Arial", 14))
         author_entry.grid(row=1, column=1, padx=10, pady=5)
 
-        # tk.Label(frame, text="Is Loanen:", font=("Arial", 14), bg="#8B644A", fg="white").grid(row=2, column=0, padx=10,
-        #                                                                                       pady=5)
-        # is_loanen_var = tk.StringVar()
-        # is_loanen_combobox = ttk.Combobox(frame, textvariable=is_loanen_var, values=["Yes", "No"], font=("Arial", 14),
-        #                                   state="readonly")
-        # is_loanen_combobox.grid(row=2, column=1, padx=10, pady=5)
-        # is_loanen_combobox.current(0)  # Set default value to 'Yes'
+
 
         tk.Label(frame, text="Copies:", font=("Arial", 14), bg="#8B644A", fg="white").grid(row=2, column=0, padx=10,
                                                                                            pady=5)
@@ -52,7 +47,7 @@ class Book_window:
 
         # Button to submit the book details
         tk.Button(frame, text="Add Book", font=("Arial", 14), width=10,
-                  command=lambda: self.add_book(title_entry, author_entry,'Yes', copies_entry, genre_entry,
+                  command=lambda: self.add_book(title_entry, author_entry,'No', copies_entry, genre_entry,
                                                 year_entry)) \
             .grid(row=6, columnspan=2, pady=10)
 
@@ -62,28 +57,7 @@ class Book_window:
             .grid(row=7, columnspan=2, pady=10)
 
     def add_book(self, title_entry, author_entry, is_loanen_var, copies_entry, genre_entry, year_entry):
-        """Function to handle adding a new book."""
-        title = title_entry.get()
-        author = author_entry.get()
-        is_loanen = is_loanen_var.get()
-        copies = copies_entry.get()
-        genre = genre_entry.get()
-        year = year_entry.get()
-
-        if not (title and author and copies and genre and year):
-            messagebox.showerror("Error", "Please fill in all fields.")
-            return
-
-        try:
-            copies = int(copies) or 1
-            year = int(year)
-            if Book.check_if_exists(title,author,year):  # Assuming check_if_exists method checks book existence
-                Book.update_copies(title,author,year, copies)  # Assuming update_copies updates the copies count
-            else:
-                Book(self,title, author, is_loanen, copies, genre, year)
-                messagebox.showinfo("Success", "Book added successfully!")
-        except ValueError:
-            messagebox.showerror("Error", "Copies and Year must be valid numbers.")
+        BookManager.add_book(self, title_entry, author_entry, is_loanen_var, copies_entry, genre_entry, year_entry)
 
     def back_to_previous(self, current_window, previous_window):
         """Function to go back to the previous window."""

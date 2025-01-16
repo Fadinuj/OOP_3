@@ -6,7 +6,7 @@ from Login import Login
 root = tk.Tk()
 root.geometry("800x600")
 root.title("Main Page")
-root.state('zoomed')  # Open in full screen
+root.state('zoomed') # Open in full screen
 
 # Load background image
 background_image = PhotoImage(file="/Users/fadinujedat/PycharmProjects/OOP_3/background.png")

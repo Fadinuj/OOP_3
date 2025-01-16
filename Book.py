@@ -1,56 +1,64 @@
 import csv
 from tkinter import messagebox
 
-
 class Book:
     book_file = 'books.csv'
-    def __init__(self, title, author, copies, genre, year):
+    def __init__(self, title, author, is_loanen, copies, available_copies, genre, year):
         self.title = title
         self.author = author
-        self.is_loanen = 'No'
-        self.copies = copies
-        self.available_copies = copies
+        self.is_loanen = is_loanen
+        self.copies = int(copies)
+        self.available_copies = int(available_copies)
         self.genre = genre
-        self.year = year
-        self.save_book()
+        self.year = int(year)
 
+    def get_title(self):
+        return self.title
+    def get_author(self):
+        return self.author
+    def get_genre(self):
+        return self.genre
+    def get_year(self):
+        return self.year
+    def get_copies(self):
+        return self.copies
+    def get_available_copies(self):
+        return self.available_copies
+    def get_is_loanen(self):
+        return self.is_loanen
     @staticmethod
-    def update_copies_and_status(title, author, year, available_copies, is_loanen):
+    def update_copies_and_status(self, title, author, year, available_copies, is_loanen):
         """Update the number of available copies and the loan status for an existing book."""
-        updated_rows = []
-        try:
-            with open(Book.book_file, mode='r') as file:
-                reader = csv.reader(file)
-                for row in reader:
-                    if row[0].strip().lower() == title.strip().lower() and \
-                            row[1].strip().lower() == author.strip().lower() and \
-                            int(row[6]) == int(year):
-                        row[4] = str(available_copies)  # Update available copies
-                        row[2] = is_loanen  # Update loan status
-                    updated_rows.append(row)
-        except FileNotFoundError:
-            messagebox.showerror("Error", "Books file not found.")
-            return
+        from BookManager import BookManager
+        for book in BookManager.books:
+            if book.title.strip().lower() == title.strip().lower() and \
+                    book.author.strip().lower() == author.strip().lower() and \
+                    int(book.year) == int(year):
+                book.available_copies = available_copies
+                book.is_loanen = is_loanen
+                break
+        BookManager.save_books_to_csv()  # שמירת השינויים לקובץ
 
+    def save_books_to_csv(self):
+        """Save the updated list of books to the CSV file."""
+        from BookManager import BookManager
         with open(Book.book_file, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerows(updated_rows)
-
+            writer.writerow(["Title", "Author", "Is Loanen", "Copies", "Available Copies", "Genre", "Year"])
+            for book in BookManager.books:
+                writer.writerow(
+                    [book.title, book.author, book.is_loanen, book.copies, book.available_copies, book.genre,
+                     book.year])
 
     @staticmethod
-    def check_if_exists(title, author,year):
-        """Check if a book with the given title already exists."""
-        try:
-            with open(Book.book_file, mode='r') as file:
-                reader = csv.reader(file)
-                for row in reader:
-                    if row[0].strip().lower() == title.strip().lower() and row[1].strip().lower() == author.strip().lower() and int(row[6]) == int(year):
-                        return True
-        except FileNotFoundError:
-            pass
+    def check_if_exists(self, title, author, year):
+        """Check if a book with the given title, author, and year already exists in the system."""
+        for book in self.books:  # Assuming self.books is the list of Book objects
+            if book.title.strip().lower() == title.strip().lower() and \
+                    book.author.strip().lower() == author.strip().lower() and \
+                    int(book.year) == int(year):
+                return True
         return False
-
-
 
     @staticmethod
     def update_available_copies(title ,author, year, additional_copies):
@@ -78,6 +86,7 @@ class Book:
             messagebox.showinfo("Success", f"Copies of '{title}' updated successfully!")
         else:
             messagebox.showerror("Error", f"Book '{title}' not found.")
+
 
     @staticmethod
     def update_copies(title, author, year, additional_copies):

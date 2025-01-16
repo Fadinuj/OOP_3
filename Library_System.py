@@ -3,9 +3,13 @@ from tkinter import messagebox
 from Book_window import Book_window
 from Book import Book  # Assuming the Book class handles book operations
 from All_books import All_books
+from BookManager import BookManager
+from WaitlistManager import WaitlistManager
 
 class Library_System:
     def __init__(self, previous_window, background_image):
+        BookManager.load_books(self,'books.csv')
+        WaitlistManager.load_waitlist_from_csv(self)
         previous_window.withdraw()
         library_system = tk.Toplevel(previous_window)
         library_system.geometry("800x600")
