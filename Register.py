@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import  messagebox
 from User import User
-
+from UserManager import UserManager
 
 class Register:
     def __init__(self, previous_window, background_image):
@@ -33,10 +33,11 @@ class Register:
                 messagebox.showerror("Error", "Please fill in all fields.")
                 return
 
-            if User.user_exists(username):
+            if UserManager.user_exists(self,username,UserManager.users):
                 messagebox.showerror("Error", "Username already exists.")
             else:
-                User(username, password)
+                UserManager.add_user(self,username,password,UserManager.users)
+                UserManager.save_users(self,UserManager.users)
                 messagebox.showinfo("Success", "User registered successfully!")
                 back_to_main_page(register_window,previous_window)
         tk.Button(frame, text="Register", font=("Arial", 14), width=10, command=submit_register).grid(row=2, columnspan=2, pady=10)

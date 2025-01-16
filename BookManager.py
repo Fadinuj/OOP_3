@@ -104,27 +104,6 @@ class BookManager:
                     return "Invalid update: copies cannot exceed total copies or be negative."
         return "Book not found."
 
-    def search_books(self, keyword, books):
-        """
-        Search for books in the books list that match the given keyword.
-
-        :param keyword: A string to search for in book attributes (case-insensitive).
-        :return: A list of Book objects that match the keyword across all fields.
-        """
-        keyword = keyword.strip().lower()  # Strip whitespace and convert to lowercase
-
-        # Filter books based on the keyword appearing in any attribute
-        matching_books = [
-            book for book in books
-            if keyword in book.title.lower() or
-               keyword in book.author.lower() or
-               keyword in str(book.copies).lower() or
-               keyword in str(book.available_copies).lower() or
-               keyword in book.genre.lower() or
-               keyword in str(book.year).lower()
-        ]
-
-        return matching_books
 
     def sort_books(self, field):
         """

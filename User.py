@@ -5,11 +5,11 @@ from tkinter import messagebox
 
 class User:
     users_file = 'users.csv'
-
-    def __init__(self, username, password):
+    def __init__(self, username, password, active='NO'):
         self.username = username
         self.password_hash = self.hash_password(password)
-        self.save_user()  # Automatically save the user upon creation
+        self.active = active
+
 
     @staticmethod
     def hash_password(password):
@@ -20,7 +20,7 @@ class User:
         """Save user details to the users.csv file."""
         with open(User.users_file, mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([self.username, self.password_hash])
+            writer.writerow([self.username, self.password_hash , self.active])
 
 
     @classmethod
@@ -30,9 +30,12 @@ class User:
         try:
             with open(cls.users_file, mode='r') as file:
                 reader = csv.reader(file)
+                flag = False
                 for row in reader:
-                    if row[0] == username and row[1] == password_hash:
-                        return True
+                    if flag:
+                        if row[0] == username and row[1] == password_hash:
+                            return True
+                    flag = True
         except FileNotFoundError:
             messagebox.showerror("Error", "Users file not found.")
         return False

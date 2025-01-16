@@ -42,13 +42,23 @@ class All_books:
                   command=lambda: self.filter_popular_books(tree)).pack(side="left", padx=5)
 
         # Search bar
+        # Search bar
         search_frame = tk.Frame(login_window, bg="black")
         search_frame.place(relx=0.5, rely=0.25, anchor="center")
+
         tk.Label(search_frame, text="Search:", font=("Arial", 14), bg="black", fg="white").pack(side="left", padx=5)
         self.search_entry = tk.Entry(search_frame, font=("Arial", 14), width=30)
         self.search_entry.pack(side="left", padx=5)
-        tk.Button(search_frame, text="Search", font=("Arial", 12), command=lambda: self.search_books(tree)) \
-            .pack(side="left", padx=5)
+
+        # Search buttons
+        tk.Button(search_frame, text="Search by Title", font=("Arial", 12), width=15,
+                  command=lambda: self.search_books_by_strategy("Title")).pack(side="left", padx=5)
+        tk.Button(search_frame, text="Search by Author", font=("Arial", 12), width=15,
+                  command=lambda: self.search_books_by_strategy("Author")).pack(side="left", padx=5)
+        tk.Button(search_frame, text="Search by Genre", font=("Arial", 12), width=15,
+                  command=lambda: self.search_books_by_strategy("Genre")).pack(side="left", padx=5)
+        tk.Button(search_frame, text="Search by Year", font=("Arial", 12), width=15,
+                  command=lambda: self.search_books_by_strategy("Year")).pack(side="left", padx=5)
 
         # Create a Treeview widget to display all books with new column "Available Copies"
         columns = ("Title", "Author", "Is Loanen", "Copies", "Available Copies", "Genre", "Year")
@@ -97,32 +107,6 @@ class All_books:
         except FileNotFoundError:
             messagebox.showinfo("Info", "No books found.")
 
-    def search_books(self,tree):
-        """
-        Search and filter books based on a keyword entered in the search entry field.
-
-        This function interacts with the BookManager to retrieve books matching the keyword.
-        If the search entry field is empty, it reloads all books. Otherwise, it clears the TreeView
-        and displays books matching the keyword based on any attribute (title, author, genre, etc.).
-        """
-        keyword = self.search_entry.get().strip().lower()
-
-        # If the search entry is empty, reload all books
-        if not keyword:
-            self.load_books()
-            return
-
-        # Clear existing rows in the TreeView
-        for row in self.tree.get_children():
-            tree.delete(row)
-
-        # Retrieve books matching the keyword using BookManager
-        matching_books = BookManager.search_books(self,keyword,BookManager.books)
-
-        # Populate the TreeView with the filtered books
-        for book in matching_books:
-            self.tree.insert("", "end", values=(book.title, book.author, book.is_loanen,
-                                                book.copies, book.available_copies, book.genre, book.year))
 
     def lend_book(self):
         """
@@ -210,6 +194,45 @@ class All_books:
 
         # Show success message
         messagebox.showinfo("Success", f"Book '{title}' has been deleted.")
+
+    def search_books_by_strategy(self, field):
+        """
+        Search books using a specific strategy (e.g., by Title, Author, Genre, Year).
+        :param field: The field to search by.
+        """
+        keyword = self.search_entry.get().strip().lower()
+
+        if not keyword:
+            self.load_books()
+            return
+
+        try:
+            # Map strategies to search fields
+            strategy_mapping = {
+                "Title": SearchByTitle(),
+                "Author": SearchByAuthor(),
+                "Genre": SearchByGenre(),
+                "Year": SearchByYear()
+            }
+
+            if field not in strategy_mapping:
+                raise ValueError(f"Invalid search field: {field}")
+
+            # Use the selected search strategy
+            search_context = SearchContext(strategy_mapping[field])
+            matching_books = search_context.search(keyword, field,BookManager.books)
+
+            # Clear existing rows in the Treeview
+            for row in self.tree.get_children():
+                self.tree.delete(row)
+
+            # Populate the TreeView with the filtered books
+            for book in matching_books:
+                self.tree.insert("", "end", values=(book.title, book.author, book.is_loanen,
+                                                    book.copies, book.available_copies, book.genre, book.year))
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to search books: {e}")
 
     def return_book(self):
         """

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import PhotoImage, messagebox
 from User import User
 from Library_System import Library_System
-
+from UserManager import UserManager
 
 class Login:
     def __init__(self, previous_window, background_image):
@@ -11,6 +11,7 @@ class Login:
         login_window.geometry("1000x800")
         login_window.title("Login")
         login_window.state('zoomed')
+        UserManager.load_users(self)
 
         background_label_login = tk.Label(login_window, image=background_image)
         background_label_login.place(relwidth=1, relheight=1)
@@ -27,7 +28,7 @@ class Login:
         password_entry.grid(row=1, column=1, padx=10, pady=5)
 
         tk.Button(frame, text="Enter", font=("Arial", 14), width=10,
-                  command=lambda: submit_login(username_entry, password_entry, login_window, background_image)) \
+                  command=lambda: submit_login(self,username_entry, password_entry, login_window, background_image)) \
             .grid(row=2, columnspan=2, pady=10)
 
         tk.Button(frame, text="Back", font=("Arial", 14), width=10,
@@ -39,7 +40,8 @@ def back_to_main_page(current_window , previous_window):
     current_window.destroy()  # Close the current window
     previous_window.deiconify()  # Show the main window again
 
-def submit_login(username_entry, password_entry, previous_window , background_image):
+def submit_login(self,username_entry, password_entry, previous_window , background_image):
+
     username = username_entry.get()
     password = password_entry.get()
 
@@ -47,7 +49,7 @@ def submit_login(username_entry, password_entry, previous_window , background_im
         messagebox.showerror("Error", "Please fill in all fields.")
         return
 
-    if User.authenticate(username, password):
+    if UserManager.authenticate(self,username, password, UserManager.users):
         Library_System(previous_window,background_image)
     else:
         messagebox.showerror("Error", "Invalid username or password.")

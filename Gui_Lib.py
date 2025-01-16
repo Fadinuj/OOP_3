@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import PhotoImage, messagebox
 from User import User  # Assuming you have a User class as described earlier
 from Register import Register
-from Login import Login
+from Login_window import Login
+
+
 root = tk.Tk()
 root.geometry("800x600")
 root.title("Main Page")
