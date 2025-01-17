@@ -4,15 +4,15 @@ To Kill a Mockingbird,Harper Lee,No,2,2,Fiction,1960
 1984,George Orwell,Yes,5,2,Dystopian,1949
 The Great Gatsby,F. Scott Fitzgerald,Yes,4,3,Classic,1925
 Moby Dick,Herman Melville,Yes,6,2,Adventure,1851
-Pride and Prejudice,Jane Austen,No,3,3,Romance,1813
+Pride and Prejudice,Jane Austen,No,7,7,Romance,1813
 War and Peace,Leo Tolstoy,No,2,2,Historical Fiction,1869
 Great Expectations,Charles Dickens,No,3,3,Classic,1861
 Crime and Punishment,Fyodor Dostoevsky,Yes,4,3,Psychological Drama,1866
 The Brothers Karamazov,Fyodor Dostoevsky,Yes,3,2,Philosophy,1880
 The Divine Comedy,Dante Alighieri,No,2,2,Epic Poetry,1320
-Jane Eyre,Charlotte Brontë,No,2,2,Gothic Fiction,1847
+Jane Eyre,Charlotte Brontë,Yes,2,1,Gothic Fiction,1847
 Wuthering Heights,Emily Brontë,Yes,4,2,Gothic Romance,1847
-Anna Karenina,Leo Tolstoy,Yes,2,1,Fiction,1877
+Anna Karenina,Leo Tolstoy,No,2,2,Fiction,1877
 Madame Bovary,Gustave Flaubert,No,3,3,Realism,1857
 The Iliad,Homer,Yes,1,1,Epic Poetry,-750
 The Sound and the Fury,William Faulkner,No,2,2,Modernism,1929
@@ -33,3 +33,5 @@ Mistborn: The Final Empire,Brandon Sanderson,Yes,4,1,Fantasy,2006
 The Handmaid's Tale,Margaret Atwood,No,3,3,Dystopian,1985
 The Odyssey,Homer,Yes,2,1,Epic Poetry,-800
 fadi,nujedat,No,4,4,action,2009
+War and Peace,Jane Austen,No,3,3,Romane,1813
+assd,sads,No,22,22,saas,1122

@@ -1,14 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox
-from Book_window import Book_window
-from Book import Book  # Assuming the Book class handles book operations
-from All_books import All_books
-from BookManager import BookManager
-from WaitlistManager import WaitlistManager
+from All_Windows.Book_window import Book_window
+from Backend.Book import Book  # Assuming the Book class handles book operations
+from All_Windows.All_books import All_books
+from Backend.BookManager import BookManager
+from Backend.WaitlistManager import WaitlistManager
 
 class Library_System:
-    def __init__(self, previous_window, background_image):
-        BookManager.load_books(self,'books.csv')
+    def __init__(self, previous_window):
+        BookManager.load_books(self, 'books.csv')
         WaitlistManager.load_waitlist_from_csv(self)
         previous_window.withdraw()
         library_system = tk.Toplevel(previous_window)
@@ -16,8 +16,7 @@ class Library_System:
         library_system.title("Library System")
         library_system.state('zoomed')
 
-        background_label_library = tk.Label(library_system, image=background_image)
-        background_label_library.place(relwidth=1, relheight=1)
+
 
         frame = tk.Frame(library_system, bg="#8B644A", bd=5)
         frame.place(relx=0.5, rely=0.4, anchor="center")
@@ -27,11 +26,11 @@ class Library_System:
 
         # Add buttons for different library operations
         tk.Button(frame, text="Add Book", font=("Arial", 14), width=15,
-                  command=lambda: self.new_book(library_system, background_image)) \
+                  command=lambda: self.new_book(library_system)) \
             .grid(row=1, column=1, padx=10, pady=5)
 
         tk.Button(frame, text="View Books", font=("Arial", 14), width=15,
-                  command=lambda: self.view_books(library_system, background_image)) \
+                  command=lambda: self.view_books(library_system)) \
             .grid(row=3, column=1, padx=10, pady=5)
 
         tk.Button(frame, text="Back", font=("Arial", 14), width=15,
@@ -52,12 +51,12 @@ class Library_System:
         else:
             messagebox.showerror("Error", f"Book '{title}' not found.")
 
-    def view_books(self, previous_window, background_image):
-        All_books(previous_window, background_image)
+    def view_books(self, previous_window):
+        All_books(previous_window)
 
     def back_to_main_page(self, current_window, previous_window):
         current_window.destroy()  # Close the current window
         previous_window.deiconify()  # Show the main window again
 
-    def new_book(self , library_system, background_image):
-        Book_window(library_system, background_image)
+    def new_book(self , library_system):
+        Book_window(library_system)

@@ -3,7 +3,10 @@ import csv
 from tkinter import messagebox
 from urllib.parse import uses_params
 
-from  User import User
+from Backend.User import User
+from Excptions.AuthenticationException import AuthenticationException
+
+
 class UserManager:
     """
     Manages user-related operations, such as authentication, adding users, and activation.
@@ -24,7 +27,7 @@ class UserManager:
             rows = list(reader)
             for row in rows:
                 if flag:
-                    username , password_hash , active = row[0], hashlib.sha256(row[1].encode()).hexdigest(), str(row[2])
+                    username , password_hash , active = row[0], row[1], str(row[2])
                     user = User(username, password_hash, active)
                     users.append(user)
                 flag = True
@@ -49,8 +52,6 @@ class UserManager:
         :param username: The username for the new user.
         :param password: The password for the new user.
         """
-
-
         password_hash = User.hash_password(password)
         user = User(username, password_hash)
         users.append(user)
@@ -67,7 +68,9 @@ class UserManager:
         password_hash = hashlib.sha256(password.encode()).hexdigest()
         for user in users:
             if user.username == username and user.password_hash == password_hash:
+                user.active = "Yes"
                 return True
+        raise AuthenticationException("Authentication failed.")
         return False
 
     def user_exists(self, username,users):

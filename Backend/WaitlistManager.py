@@ -1,5 +1,5 @@
 import csv
-
+from Backend.Logger import Logger
 class WaitlistManager:
     waitlist_file = 'Waitlist.csv'
     waitlist = []  # רשימת המתנה (רשימת מילונים)
@@ -66,14 +66,12 @@ class WaitlistManager:
                     int(entry["Year"]) == int(year)
             ):
                 waitlist.remove(entry)
-
+                Logger.log_info(f"User '{entry['Name']}' removed from waitlist for book: {book_title}.")
                 # Save the updated waitlist
                 with open(self.waitlist_file, 'w', newline="") as file:
                     writer = csv.DictWriter(file, fieldnames=header)
                     writer.writeheader()  # Write the header first
                     writer.writerows(waitlist)  # Write the remaining waitlist entries
-
-                print(f"Removed {entry['Name']} from waitlist for '{book_title}'.")
                 return entry  # Return the removed customer
         return None  # Return None if no matching customer is found
 

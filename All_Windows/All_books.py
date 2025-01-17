@@ -1,16 +1,19 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import csv
-from Book import Book  # Assuming Book class handles CSV file operations
-from BookManager import BookManager
-from WaitlistManager import WaitlistManager
-from Strategy_Search import SearchContext, SearchByTitle, SearchByAuthor, SearchByGenre, SearchByYear
+from Backend.Book import Book  # Assuming Book class handles CSV file operations
+from Backend.BookManager import BookManager
+from Backend.WaitlistManager import WaitlistManager
+from Backend.Strategy_Search import SearchContext, SearchByTitle, SearchByAuthor, SearchByGenre, SearchByYear
+from Backend.Logger import Logger
+from Backend.LibrarianObserver import LibrarianObserver
+from Excptions.EmptyFieldException import EmptyFieldException
 
 
 class All_books:
     waitlist_file = 'Waitlist.csv'  # Path to the waitlist CSV file
 
-    def __init__(self, previous_window, background_image):
+    def __init__(self, previous_window):
         previous_window.withdraw()  # Hide the previous window
         login_window = tk.Toplevel(previous_window)
         login_window.geometry("800x600")
@@ -105,7 +108,7 @@ class All_books:
                     self.tree.insert("", "end",
                                      values=(title, author, is_loanen, copies, available_copies, genre, year))
         except FileNotFoundError:
-            messagebox.showinfo("Info", "No books found.")
+            LibrarianObserver.notify(self,"message","Info", "No books found.")
 
 
     def lend_book(self):
@@ -130,7 +133,7 @@ class All_books:
         """
         selected_item = self.tree.selection()
         if not selected_item:
-            messagebox.showerror("Error", "Please select a book to lend.")
+            LibrarianObserver.notify(self,"error","Error", "Please select a book to lend.")
             return
 
         book_values = self.tree.item(selected_item, "values")
@@ -143,7 +146,7 @@ class All_books:
                     book.available_copies -= 1
                     if book.available_copies < book.copies:
                         book.is_loanen = "Yes"  # Update loan status
-                    messagebox.showinfo("Success", f"Book '{title}' has been lent.")
+                    LibrarianObserver.notify(self,"message","Success", f"Book '{title}' has been lent.")
                 else:
                     # Open the waitlist window
                     self.open_waitlist_window(title, author, year)
@@ -161,7 +164,7 @@ class All_books:
         # Get the selected book from the Treeview
         selected_item = self.tree.selection()
         if not selected_item:
-            messagebox.showerror("Error", "Please select a book to delete.")
+            LibrarianObserver.notify(self,"error","Error", "Please select a book to delete.")
             return
 
         # Extract the book details from the selected row
@@ -171,7 +174,7 @@ class All_books:
 
         # Check if the book is currently loaned
         if is_loanen == "Yes":
-            messagebox.showwarning("Warning", f"Cannot delete the book '{title}' because it is currently loaned.")
+            LibrarianObserver.notify(self,"warning","Warning", f"Cannot delete the book '{title}' because it is currently loaned.")
             return
 
         # Find and remove the book from the BookManager's list of books
@@ -183,7 +186,7 @@ class All_books:
                 break
 
         if not book_found:
-            messagebox.showwarning("Warning", f"Book '{title}' not found in the system.")
+            LibrarianObserver.notify(self,"warning","Warning",f"Book '{title}' not found in the system.")
             return
 
         # Save the updated book list to the CSV file
@@ -193,7 +196,7 @@ class All_books:
         self.load_books()
 
         # Show success message
-        messagebox.showinfo("Success", f"Book '{title}' has been deleted.")
+        LibrarianObserver.notify(self,"message","Success", f"Book '{title}' has been deleted.")
 
     def search_books_by_strategy(self, field):
         """
@@ -232,7 +235,7 @@ class All_books:
                                                     book.copies, book.available_copies, book.genre, book.year))
 
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to search books: {e}")
+            LibrarianObserver.notify(self,"error","Error", f"Search failed with error: {e}")
 
     def return_book(self):
         """
@@ -251,7 +254,7 @@ class All_books:
         """
         selected_item = self.tree.selection()
         if not selected_item:
-            messagebox.showerror("Error", "Please select a book to return.")
+            LibrarianObserver.notify(self,"error","Error", "Please select a book to return.")
             return
 
         # Get the selected book's values from the Treeview
@@ -273,20 +276,18 @@ class All_books:
                         # Assign the book to the next customer in the queue
                         book.available_copies -= 1
                         book.is_loanen = "Yes"
-                        messagebox.showinfo(
-                            "Waitlist Update",
-                            f"Book '{title}' has been assigned to {waitlist_entry['Name']} from the waitlist."
-                        )
+                        LibrarianObserver.notify(self,"message","Waitlist Update",
+                            f"Book '{title}' has been assigned to {waitlist_entry['Name']} from the waitlist.")
 
                     # Save the updated book list and waitlist to CSV files
                     BookManager.save_books_to_csv()
 
                     # Reload the books in the Treeview
                     self.load_books()
-                    messagebox.showinfo("Success", f"Book '{title}' has been returned.")
+                    LibrarianObserver.notify(self,"message","Success",f"Book '{title}' has been returned.")
                     return
                 else:
-                    messagebox.showwarning("Warning", f"All copies of '{title}' are already available.")
+                    LibrarianObserver.notify(self,"warning","Warning",f"Book '{title}' is already available.")
                     return
 
     def add_to_waitlist(self, window, book_title, author, year, name, phone, email):
@@ -302,9 +303,14 @@ class All_books:
         :param phone: The phone number of the customer.
         :param email: The email address of the customer.
         """
-        if not (name and phone and email):
-            messagebox.showerror("Error", "Please fill in all fields.")
-            return
+        if not book_title.strip():
+            raise EmptyFieldException("Book Title")
+        if not name.strip():
+            raise EmptyFieldException("Customer Name")
+        if not phone.strip():
+            raise EmptyFieldException("Phone")
+        if not email.strip():
+            raise EmptyFieldException("Email")
 
         # Create a new waitlist entry with additional attributes
         waitlist_entry = {
@@ -326,9 +332,11 @@ class All_books:
                 writer = csv.DictWriter(file, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(WaitlistManager.waitlist)
-            messagebox.showinfo("Success", f"{name} has been added to the waitlist for '{book_title}'.")
+            Logger.log_info(f"User '{name}' added to waitlist for book: {book_title}.")
+            LibrarianObserver.notify(self,"message","Success", f"{name} has been added to the waitlist for '{book_title}'.")
+
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to update waitlist file: {e}")
+            LibrarianObserver.notify(self,"error","Error", f"Failed to update waitlist file: {e}")
 
         # Close the current window after the operation
         window.destroy()
@@ -337,7 +345,7 @@ class All_books:
         """Check if there are customers in the waitlist for the returned book and assign it."""
         removed_entry = WaitlistManager.remove_from_waitlist(self, book_title,author,year,WaitlistManager.waitlist)
         if removed_entry:
-            messagebox.showinfo("Info", f"Book '{book_title}' has been assigned to {removed_entry['Name']}.")
+            LibrarianObserver.notify(self,"message","Info", f"Book '{book_title}' has been assigned to {removed_entry['Name']}.")
             Book.update_available_copies(book_title, author, year, -1)
 
 
@@ -370,8 +378,7 @@ class All_books:
                 )
 
         except Exception as e:
-            print(f"Error sorting books: {e}")
-            messagebox.showerror("Error", f"Failed to sort books by {field}.")
+            LibrarianObserver.notify(self,"error","Error", f"Failed to sort books by {field}.")
 
     @staticmethod
     def back_to_previous(current_window, previous_window):
@@ -395,7 +402,7 @@ class All_books:
                                                book.copies, book.available_copies,
                                                book.genre, book.year))
         except Exception as e:
-            messagebox.showerror("Error", f"Could not filter loaned books: {e}")
+            LibrarianObserver.notify(self,"error","Error", f"Failed to filter loaned books: {e}")
 
     def open_waitlist_window(self, book_title, author, year):
         """
@@ -443,4 +450,4 @@ class All_books:
                     if int(int(row[3]) - int(row[4])) > 3:
                         tree.insert("", "end", values=row)
         except FileNotFoundError:
-            messagebox.showinfo("Info", "No books found.")
+            LibrarianObserver.notify(self,"message","Info", "No books found.")

@@ -1,18 +1,20 @@
 import tkinter as tk
 from tkinter import  messagebox
-from User import User
-from UserManager import UserManager
+from Backend.UserManager import UserManager
+from Backend.Logger import Logger
+from Excptions.EmptyFieldException import EmptyFieldException
+from Excptions.UserAlreadyExistsException import UserAlreadyExistsException
+
 
 class Register:
-    def __init__(self, previous_window, background_image):
+    def __init__(self, previous_window):
         previous_window.withdraw()  # Hide the previous window
         register_window = tk.Toplevel(previous_window)
         register_window.geometry("1000x800")
         register_window.title("Register")
         register_window.state('zoomed')
 
-        background_label_register = tk.Label(register_window, image=background_image)
-        background_label_register.place(relwidth=1, relheight=1)
+
 
         frame = tk.Frame(register_window, bg="#8B644A", bd=5)
         frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -29,16 +31,21 @@ class Register:
             username = username_entry.get()
             password = password_entry.get()
 
-            if not username or not password:
-                messagebox.showerror("Error", "Please fill in all fields.")
+            if not username:
+                raise EmptyFieldException("Username")
+                return
+            if not password:
+                raise EmptyFieldException("Password")
                 return
 
             if UserManager.user_exists(self,username,UserManager.users):
+                raise UserAlreadyExistsException(username)
                 messagebox.showerror("Error", "Username already exists.")
+                Logger.log_warning(f"Failed to add user: Username '{username}' already exists.")
             else:
                 UserManager.add_user(self,username,password,UserManager.users)
                 UserManager.save_users(self,UserManager.users)
-                messagebox.showinfo("Success", "User registered successfully!")
+                Logger.log_info(f"User '{username}' added successfully.")
                 back_to_main_page(register_window,previous_window)
         tk.Button(frame, text="Register", font=("Arial", 14), width=10, command=submit_register).grid(row=2, columnspan=2, pady=10)
         tk.Button(frame, text="Back", font=("Arial", 14), width=10, command=lambda: back_to_main_page(register_window , previous_window)).grid(row=3, columnspan=2, pady=10)

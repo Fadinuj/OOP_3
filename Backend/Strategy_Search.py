@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from BookManager import BookManager
+
 
 # Abstract base class for search strategies
 class Strategy_Search(ABC):

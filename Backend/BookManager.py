@@ -1,7 +1,10 @@
 import csv
-from tkinter import ttk, messagebox
 
-from Book import Book
+from Backend.LibrarianObserver import LibrarianObserver
+from Backend.Logger import Logger
+from Excptions.EmptyFieldException import EmptyFieldException
+
+from Backend.Book import Book
 
 
 class BookManager:
@@ -60,36 +63,48 @@ class BookManager:
         copies = copies_entry.get().strip()
         genre = genre_entry.get().strip()
         year = year_entry.get().strip()
-
-        if not (title and author and copies and genre and year):
-            messagebox.showerror("Error", "Please fill in all fields.")
-            return
+        if not title:
+            raise EmptyFieldException("Title")
+        if not author:
+            raise EmptyFieldException("Author")
+        if not copies:
+            raise EmptyFieldException("Copies")
+        if not genre:
+            raise EmptyFieldException("Genre")
+        if not year:
+            raise EmptyFieldException("Year")
 
         try:
             copies = int(copies) or 1
             year = int(year)
 
-            # בדיקה אם הספר כבר קיים ברשימת האובייקטים
+            # Check if the book already exists in the list of objects
             existing_book = next((book for book in BookManager.books if
-                                  book.title == title and book.author == author and book.genre== genre.book.year == year), None)
+                                  str(book.title) == str(title) and
+                                  str(book.author) == str(author) and
+                                  str(book.genre) == str(genre) and
+                                  int(book.year) == int(year)), None)
 
             if existing_book:
-                # עדכון מספר העותקים אם הספר קיים
+                # Update the number of copies if the book exists
                 existing_book.copies += copies
                 existing_book.available_copies += copies
-                messagebox.showinfo("Info", f"Updated copies for '{title}'.")
+                Logger.log_warning(
+                    f"Failed to add book: '{title}' by '{author}' already exists, and the copies were updated.")
+                LibrarianObserver.notify(self, "message", "Info", f"Updated copies for '{title}'.")
             else:
-                # יצירת אובייקט חדש והוספה לרשימת הספרים
+                # Create a new object and add it to the list of books
                 new_book = Book(title, author, is_loanen, copies, copies, genre, year)
                 BookManager.books.append(new_book)
-                messagebox.showinfo("Success", "Book added successfully!")
+                Logger.log_info(f"Book '{title}' by '{author}' added successfully.")
+                LibrarianObserver.notify(self, "Message", "Success",
+                                         f"Book '{title}' by '{author}' added successfully.")
 
-            # שמירה לקובץ לאחר עדכון הרשימה
+            # Save to the file after updating the list
             BookManager.save_books_to_csv()
 
         except ValueError:
-            messagebox.showerror("Error", "Copies and Year must be valid numbers.")
-
+            LibrarianObserver.notify(self, "Error", "Error", "Copies and Year must be valid numbers.")
 
     def update_copies(self, title, author, year, delta):
         """Update the number of available copies for a book."""

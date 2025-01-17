@@ -1,20 +1,12 @@
 import tkinter as tk
-from tkinter import PhotoImage, messagebox
-from User import User  # Assuming you have a User class as described earlier
-from Register import Register
-from Login_window import Login
+from All_Windows.Register import Register
+from All_Windows.Login_window import Login
 
 
 root = tk.Tk()
 root.geometry("800x600")
 root.title("Main Page")
 root.state('zoomed') # Open in full screen
-
-# Load background image
-background_image = PhotoImage(file="/Users/fadinujedat/PycharmProjects/OOP_3/background.png")
-background_label = tk.Label(root, image=background_image)
-background_label.place(relwidth=1, relheight=1)
-
 
 # Frame to center buttons
 frame = tk.Frame(root, bg="#ffffff", bd=5)
@@ -31,7 +23,7 @@ tk.Button(frame, text="Exit", font=("Arial", 14), width=15, command=root.quit)\
     .grid(row=2, column=0, padx=10, pady=10)
 
 def login_clicked(previous_window):
-    Login(previous_window,background_image)
+    Login(previous_window)
 def register_clicked(previous_window):
-    Register(previous_window,background_image)
+    Register(previous_window)
 root.mainloop()

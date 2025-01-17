@@ -1,11 +1,10 @@
 import tkinter as tk
-from tkinter import PhotoImage, messagebox
-from User import User
+from tkinter import messagebox
 from Library_System import Library_System
-from UserManager import UserManager
-
+from Backend.UserManager import UserManager
+from Backend.Logger import Logger
 class Login:
-    def __init__(self, previous_window, background_image):
+    def __init__(self, previous_window):
         previous_window.withdraw()  # Hide the previous window
         login_window = tk.Toplevel(previous_window)
         login_window.geometry("1000x800")
@@ -13,8 +12,6 @@ class Login:
         login_window.state('zoomed')
         UserManager.load_users(self)
 
-        background_label_login = tk.Label(login_window, image=background_image)
-        background_label_login.place(relwidth=1, relheight=1)
 
         frame = tk.Frame(login_window, bg="#8B644A", bd=5)
         frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -28,7 +25,7 @@ class Login:
         password_entry.grid(row=1, column=1, padx=10, pady=5)
 
         tk.Button(frame, text="Enter", font=("Arial", 14), width=10,
-                  command=lambda: submit_login(self,username_entry, password_entry, login_window, background_image)) \
+                  command=lambda: submit_login(self,username_entry, password_entry, login_window)) \
             .grid(row=2, columnspan=2, pady=10)
 
         tk.Button(frame, text="Back", font=("Arial", 14), width=10,
@@ -40,7 +37,7 @@ def back_to_main_page(current_window , previous_window):
     current_window.destroy()  # Close the current window
     previous_window.deiconify()  # Show the main window again
 
-def submit_login(self,username_entry, password_entry, previous_window , background_image):
+def submit_login(self,username_entry, password_entry, previous_window):
 
     username = username_entry.get()
     password = password_entry.get()
@@ -50,6 +47,8 @@ def submit_login(self,username_entry, password_entry, previous_window , backgrou
         return
 
     if UserManager.authenticate(self,username, password, UserManager.users):
-        Library_System(previous_window,background_image)
+        Library_System(previous_window)
+        Logger.log_info(f"User '{username}' logged in successfully.")
     else:
         messagebox.showerror("Error", "Invalid username or password.")
+        Logger.log_error(f"Failed login attempt for username: '{username}'.")

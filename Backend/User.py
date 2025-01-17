@@ -7,7 +7,7 @@ class User:
     users_file = 'users.csv'
     def __init__(self, username, password, active='NO'):
         self.username = username
-        self.password_hash = self.hash_password(password)
+        self.password_hash = password
         self.active = active
 
 

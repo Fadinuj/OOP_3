@@ -1,18 +1,14 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
-from Book import Book  # Assuming the Book class is in Book.py
-from BookManager import BookManager
+from Backend.BookManager import BookManager
 
 class Book_window:
-    def __init__(self, previous_window, background_image):
+    def __init__(self, previous_window):
         previous_window.withdraw()
         book_window = tk.Toplevel(previous_window)
         book_window.geometry("800x600")
         book_window.title("Add New Book")
         book_window.state('zoomed')
 
-        background_label = tk.Label(book_window, image=background_image)
-        background_label.place(relwidth=1, relheight=1)
 
         frame = tk.Frame(book_window, bg="#8B644A", bd=5)
         frame.place(relx=0.5, rely=0.4, anchor="center")
