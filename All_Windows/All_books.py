@@ -439,15 +439,42 @@ class All_books:
             .pack(pady=20)
 
     def filter_popular_books(self, tree):
-        """Filter and display popular books (books with more than 3 copies)."""
+        """
+        Filter and display popular books in the Treeview (books with more than 3 total lent copies).
+
+        A popular book is determined by the number of times it has been lent out (total copies - available copies).
+        """
+        # Clear existing rows in the Treeview
         for row in tree.get_children():
             tree.delete(row)
 
         try:
-            with open(Book.book_file, mode='r') as file:
-                reader = csv.reader(file)
-                for row in reader:
-                    if int(int(row[3]) - int(row[4])) > 3:
-                        tree.insert("", "end", values=row)
-        except FileNotFoundError:
-            LibrarianObserver.notify(self,"message","Info", "No books found.")
+            # Filter popular books based on the in-memory BookManager list
+            popular_books = [
+                book for book in BookManager.books
+                if (int(book.copies) - int(book.available_copies)) > 3
+            ]
+
+            if not popular_books:
+                LibrarianObserver.notify(self, "message", "Info", "No popular books found.")
+                return
+
+            # Insert filtered books into the Treeview
+            for book in popular_books:
+                tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        book.title, book.author, book.is_loanen, book.copies,
+                        book.available_copies, book.genre, book.year
+                    )
+                )
+
+            LibrarianObserver.notify(
+                self, "message", "Info", f"Displayed {len(popular_books)} popular books."
+            )
+        except Exception as e:
+            LibrarianObserver.notify(
+                self, "error", "Error", f"Failed to filter popular books: {str(e)}"
+            )
+
