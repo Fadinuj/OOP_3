@@ -1,13 +1,13 @@
 import tkinter as tk
 from All_Windows.Register import Register
 from All_Windows.Login_window import Login
-
+from Backend.Logger import Logger
 
 root = tk.Tk()
 root.geometry("800x600")
 root.title("Main Page")
 root.state('zoomed') # Open in full screen
-
+Logger.setup_logger()
 # Frame to center buttons
 frame = tk.Frame(root, bg="#ffffff", bd=5)
 frame.place(relx=0.5, rely=0.5, anchor="center")

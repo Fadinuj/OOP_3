@@ -16,8 +16,6 @@ class Library_System:
         library_system.title("Library System")
         library_system.state('zoomed')
 
-
-
         frame = tk.Frame(library_system, bg="#8B644A", bd=5)
         frame.place(relx=0.5, rely=0.4, anchor="center")
 
@@ -36,8 +34,6 @@ class Library_System:
         tk.Button(frame, text="Back", font=("Arial", 14), width=15,
                   command=lambda: self.back_to_main_page(library_system, previous_window)) \
             .grid(row=4, column=1, padx=10, pady=5)
-
-
 
     def remove_book(self, remove_entry):
         title = remove_entry.get().strip()

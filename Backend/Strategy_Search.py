@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from Backend.Logger import Logger
+
 
 # Abstract base class for search strategies
 class Strategy_Search(ABC):
@@ -71,15 +73,19 @@ class SearchContext:
         """Perform search using the current strategy."""
         if field == "Title":
             titleSearch = SearchByTitle()
+            Logger.log_info(f"Search book by name {keyword} completed successfully")
             return titleSearch.search(keyword,books)
         elif field == "Author":
             titleSearch = SearchByAuthor()
+            Logger.log_info(f"Search book by name author {keyword} completed successfully")
             return titleSearch.search(keyword, books)
         elif field == "Genre":
             titleSearch = SearchByGenre()
+            Logger.log_info(f"Search book by name Genre completed {keyword} successfully")
             return titleSearch.search(keyword, books)
         elif field == "Year":
             titleSearch = SearchByYear()
+            Logger.log_info(f"Search book  by year {keyword} completed successfully")
             return titleSearch.search(keyword, books)
 
 

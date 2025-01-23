@@ -134,6 +134,7 @@ Tests cover:
 - WaitlistManager operations.
 - Search strategies.
 - Logging and notifications.
+- Observer (לא היה כל כך משמעות להשתמש כי יש לנו רק ספרן אחד משתמש במערכת)
 
 ---
 

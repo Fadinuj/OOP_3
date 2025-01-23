@@ -143,12 +143,16 @@ class BookManager:
             # Sort the books based on the chosen field
             if field == "Title":
                 sorted_books = sorted(BookManager.books, key=lambda book: book.get_title())
+                Logger.log_info(f"Displayed books by {field} successfully")
             elif field == "Author":
                 sorted_books = sorted(BookManager.books, key=lambda book: book.get_author())
+                Logger.log_info(f"Displayed books by {field} successfully")
             elif field == "Genre":
                 sorted_books = sorted(BookManager.books, key=lambda book: book.get_genre())
+                Logger.log_info(f"Displayed books by {field} successfully")
             elif field == "Year":
                 sorted_books = sorted(BookManager.books, key=lambda book: book.get_year())
+                Logger.log_info(f"Displayed books by {field} successfully")
             return sorted_books
 
         except Exception as e:
@@ -164,7 +168,7 @@ class BookManager:
         loaned_books = []
         try:
             for book in books:
-                if book.get_is_loanen() == "Yes":  # Check the loaned status
+                if book.available_copies < book.copies:  # Check the loaned status
                     loaned_books.append(book)
             return loaned_books
         except Exception as e:

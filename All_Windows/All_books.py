@@ -9,7 +9,6 @@ from Backend.Logger import Logger
 from Backend.LibrarianObserver import LibrarianObserver
 from Excptions.EmptyFieldException import EmptyFieldException
 
-
 class All_books:
     waitlist_file = 'Waitlist.csv'  # Path to the waitlist CSV file
 
@@ -133,6 +132,7 @@ class All_books:
         """
         selected_item = self.tree.selection()
         if not selected_item:
+            Logger.log_error("Error Please select a book to lend.")
             LibrarianObserver.notify(self,"error","Error", "Please select a book to lend.")
             return
 
@@ -144,8 +144,9 @@ class All_books:
             if book.title == title and book.author == author and book.year == year:
                 if book.available_copies > 0:
                     book.available_copies -= 1
-                    if book.available_copies < book.copies:
+                    if book.available_copies == 0:
                         book.is_loanen = "Yes"  # Update loan status
+                    Logger.log_info(f"Book '{title}' has been lent.")
                     LibrarianObserver.notify(self,"message","Success", f"Book '{title}' has been lent.")
                 else:
                     # Open the waitlist window
@@ -170,10 +171,11 @@ class All_books:
         # Extract the book details from the selected row
         book_values = self.tree.item(selected_item, "values")
         title, author, year = book_values[0], book_values[1], int(book_values[6])
+        copies , available_copies = book_values[3], book_values[4]
         is_loanen = book_values[2]
 
         # Check if the book is currently loaned
-        if is_loanen == "Yes":
+        if available_copies < copies:
             LibrarianObserver.notify(self,"warning","Warning", f"Cannot delete the book '{title}' because it is currently loaned.")
             return
 
@@ -207,6 +209,7 @@ class All_books:
 
         if not keyword:
             self.load_books()
+            Logger.log_info("Displayed all books successfully/")
             return
 
         try:
@@ -220,6 +223,7 @@ class All_books:
 
             if field not in strategy_mapping:
                 raise ValueError(f"Invalid search field: {field}")
+                Logger.log_error("Error Please select a book to return.")
 
             # Use the selected search strategy
             search_context = SearchContext(strategy_mapping[field])
@@ -255,6 +259,7 @@ class All_books:
         selected_item = self.tree.selection()
         if not selected_item:
             LibrarianObserver.notify(self,"error","Error", "Please select a book to return.")
+            Logger.log_error("Error Please select a book to return.")
             return
 
         # Get the selected book's values from the Treeview
@@ -267,7 +272,7 @@ class All_books:
                 if book.available_copies < book.copies:  # Ensure that there are loaned copies to return
                     book.available_copies += 1
 
-                    if book.available_copies == book.copies:
+                    if book.available_copies > 0:
                         book.is_loanen = "No"  # Update the loan status if all copies are available
 
                     # Check and assign to the next customer on the waitlist
@@ -275,9 +280,11 @@ class All_books:
                     if waitlist_entry:
                         # Assign the book to the next customer in the queue
                         book.available_copies -= 1
-                        book.is_loanen = "Yes"
+                        if(book.available_copies == 0):
+                            is_loanen = "Yes"
                         LibrarianObserver.notify(self,"message","Waitlist Update",
                             f"Book '{title}' has been assigned to {waitlist_entry['Name']} from the waitlist.")
+                        Logger.log_info(f"Book '{title}' has been assigned to {waitlist_entry['Name']} from the waitlist.")
 
                     # Save the updated book list and waitlist to CSV files
                     BookManager.save_books_to_csv()
@@ -285,9 +292,11 @@ class All_books:
                     # Reload the books in the Treeview
                     self.load_books()
                     LibrarianObserver.notify(self,"message","Success",f"Book '{title}' has been returned.")
+                    Logger.log_info(f"Book '{title}' has been returned.")
                     return
                 else:
                     LibrarianObserver.notify(self,"warning","Warning",f"Book '{title}' is already available.")
+                    Logger.log_warning("Book '{title}' is already available.")
                     return
 
     def add_to_waitlist(self, window, book_title, author, year, name, phone, email):
@@ -336,6 +345,7 @@ class All_books:
             LibrarianObserver.notify(self,"message","Success", f"{name} has been added to the waitlist for '{book_title}'.")
 
         except Exception as e:
+            Logger.log_error(f"Error Failed to update waitlist file: {e}")
             LibrarianObserver.notify(self,"error","Error", f"Failed to update waitlist file: {e}")
 
         # Close the current window after the operation
@@ -345,6 +355,7 @@ class All_books:
         """Check if there are customers in the waitlist for the returned book and assign it."""
         removed_entry = WaitlistManager.remove_from_waitlist(self, book_title,author,year,WaitlistManager.waitlist)
         if removed_entry:
+            Logger.log_info(f"Book '{book_title}' has been assigned to {removed_entry['Name']}.")
             LibrarianObserver.notify(self,"message","Info", f"Book '{book_title}' has been assigned to {removed_entry['Name']}.")
             Book.update_available_copies(book_title, author, year, -1)
 
@@ -378,6 +389,7 @@ class All_books:
                 )
 
         except Exception as e:
+            Logger.log_error(f"Error Failed to sort books: {field}")
             LibrarianObserver.notify(self,"error","Error", f"Failed to sort books by {field}.")
 
     @staticmethod
@@ -395,13 +407,14 @@ class All_books:
         try:
             # Use the BookManager's function to filter loaned books
             loaned_books = BookManager.get_loaned_books(self,BookManager.books)  # Assuming book_manager is an instance of BookManager
-
+            Logger.log_info(f"Displayed All loaned books successfully")
             # Insert filtered loaned books into the Treeview
             for book in loaned_books:
                 tree.insert("", "end", values=(book.title, book.author, book.is_loanen,
                                                book.copies, book.available_copies,
                                                book.genre, book.year))
         except Exception as e:
+            Logger.log_error(f"Error Failed to filter loaned books: {e}")
             LibrarianObserver.notify(self,"error","Error", f"Failed to filter loaned books: {e}")
 
     def open_waitlist_window(self, book_title, author, year):
@@ -456,6 +469,7 @@ class All_books:
             ]
 
             if not popular_books:
+                Logger.log_info("No popular books found.")
                 LibrarianObserver.notify(self, "message", "Info", "No popular books found.")
                 return
 
@@ -473,8 +487,9 @@ class All_books:
             LibrarianObserver.notify(
                 self, "message", "Info", f"Displayed {len(popular_books)} popular books."
             )
+            Logger.log_info(f"Displayed {len(popular_books)} popular books.")
         except Exception as e:
             LibrarianObserver.notify(
                 self, "error", "Error", f"Failed to filter popular books: {str(e)}"
             )
-
+            Logger.log_error(f"Error Failed to filter popular books: {str(e)}")
